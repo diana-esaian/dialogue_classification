@@ -12,6 +12,7 @@ books = []
 book_wordcount = []
 dialogues = []
 dialogues_wordcout = []
+ratio = []
 
 # extract dialogues
 for text in texts:
@@ -25,9 +26,9 @@ for text in texts:
   dialogue = []
   for paragraph in all_paragraphs:
     # replicas starting with -
-    huge_replica_1 = re.findall('\\n *[–|-] *[А-Я].*?\\n', paragraph)
+    huge_replica_1 = re.findall('\\n *(--|––|–|-) *[А-Я].*?\\n', paragraph)
     if len(huge_replica_1) != 0:
-      replicas_and_authors_1 = re.findall('[–|-].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..](?= *[–|-].*?[(!)+|(?)+|.|...|…|..|,|!?|?!|?!?|!?!|!..|?..])', paragraph)
+      replicas_and_authors_1 = re.findall('(--|––|–|-).*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..](?= *(--|––|–|-).*?[(!)+|(?)+|.|...|…|..|,|!?|?!|?!?|!?!|!..|?..])', paragraph)
       if len(replicas_and_authors_1) != 0:
         for index in range(len(replicas_and_authors_1)):
           if index % 2 == 0:
@@ -42,16 +43,16 @@ for text in texts:
           dialogue.append(replica.replace('\n', ''))
     # replicas with «»
     else:
-      short_replica_1 = re.findall('[«|"].*?[»|"](?= *[–|-])', paragraph)
+      short_replica_1 = re.findall('[«|"].*?[»|"](?= *(--|––|–|-))', paragraph)
       if len(short_replica_1) != 0:
         dialogue = dialogue + short_replica_1
       short_replica_2 = re.findall('(?<=:) *[«|"].*?[»|"]', paragraph)
       if len(short_replica_2) != 0:
         dialogue = dialogue + short_replica_2
-      huge_replica_2 = re.findall('[«|"].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *[–|-].*?[»|"]', paragraph)
+      huge_replica_2 = re.findall('[«|"].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(--|––|–|-).*?[»|"]', paragraph)
       if len(huge_replica_2) != 0:
         for sentence in huge_replica_2:
-          replicas_and_authors_2 = re.findall('.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(?=[–|-])', sentence)
+          replicas_and_authors_2 = re.findall('.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(?=(--|––|–|-))', sentence)
           for index in range(len(replicas_and_authors_2)):
             if index % 2 == 0:
               dialogue.append(replicas_and_authors_2[index])
@@ -99,13 +100,14 @@ for text in texts:
   dialogues_wordcout.append(dialogue_words)
 
 # preparing dataset 
-df_columns = ['author', 'book', 'book_wordcount', 'dialogues', 'dialogues_wordcout']
+df_columns = ['author', 'book', 'book_wordcount', 'dialogues', 'dialogues_wordcout', 'ratio']
 dataframe = pd.DataFrame(columns = df_columns)
 dataframe['author'] = authors
 dataframe['book'] = books
 dataframe['book_wordcount'] = book_wordcount
 dataframe['dialogues'] = dialogues
 dataframe['dialogues_wordcout'] = dialogues_wordcout
+dataframe['ratio'] = dataframe['dialogues_wordcout'] / dataframe['book_wordcount']
 
 # creating a dataset 
 dataframe.to_csv('dataset.csv')
