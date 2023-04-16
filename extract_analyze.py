@@ -24,35 +24,65 @@ for text in texts:
     paragraph = '\n' + para +'\n'
     all_paragraphs.append(paragraph)
   dialogue = []
-  for paragraph in all_paragraphs:
-    # replicas starting with -
-    huge_replica_1 = re.findall('\\n *(--|––|–|-) *[А-Я].*?\\n', paragraph)
-    if len(huge_replica_1) != 0:
-      replicas_and_authors_1 = re.findall('(--|––|–|-).*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..](?= *(--|––|–|-).*?[(!)+|(?)+|.|...|…|..|,|!?|?!|?!?|!?!|!..|?..])', paragraph)
-      if len(replicas_and_authors_1) != 0:
-        for index in range(len(replicas_and_authors_1)):
+
+for paragraph in all_paragraphs:
+  # replicas starting with -
+  huge_replica_1 = re.findall('\n *[–|-].*[А-Я].*?\n', paragraph)
+  if len(huge_replica_1) != 0:
+    replicas_and_authors_1 = re.findall('–.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..](?= *–.*?[(!)+|(?)+|.|...|…|..|,|!?|?!|?!?|!?!|!..|?..])', paragraph)
+    if len(replicas_and_authors_1) != 0:
+      for index in range(len(replicas_and_authors_1)):
+        if index % 2 == 0:
+          dialogue.append(replicas_and_authors_1[index])
+      if len(replicas_and_authors_1) % 2 == 0:
+        last_extracted = replicas_and_authors_1[len(replicas_and_authors_1)-1]
+        last_extracted = last_extracted.replace('.','\.').replace('?','\?').replace('*','\*').replace('+','\+').replace('(','\(').replace(')','\)').replace('[','\[').replace(']','\]')
+        last_replica = re.findall('(?<={last_extracted}).*'.format(last_extracted = last_extracted), paragraph)
+        dialogue = dialogue + last_replica
+
+    else:
+      replicas_and_authors_1_1 = re.findall('-.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..](?= *-.*?[(!)+|(?)+|.|...|…|..|,|!?|?!|?!?|!?!|!..|?..])', paragraph)
+      if len(replicas_and_authors_1_1) != 0:
+        for index in range(len(replicas_and_authors_1_1)):
           if index % 2 == 0:
-            dialogue.append(replicas_and_authors_1[index])
-        if len(replicas_and_authors_1) % 2 == 0:
-          last_extracted = replicas_and_authors_1[len(replicas_and_authors_1)-1]
+            dialogue.append(replicas_and_authors_1_1[index])
+        if len(replicas_and_authors_1_1) % 2 == 0:
+          last_extracted = replicas_and_authors_1_1[len(replicas_and_authors_1_1)-1]
           last_extracted = last_extracted.replace('.','\.').replace('?','\?').replace('*','\*').replace('+','\+').replace('(','\(').replace(')','\)').replace('[','\[').replace(']','\]')
           last_replica = re.findall('(?<={last_extracted}).*'.format(last_extracted = last_extracted), paragraph)
           dialogue = dialogue + last_replica
+
       else:
-        for replica in huge_replica_1:
-          dialogue.append(replica.replace('\n', ''))
-    # replicas with «»
-    else:
-      short_replica_1 = re.findall('[«|"].*?[»|"](?= *(--|––|–|-))', paragraph)
-      if len(short_replica_1) != 0:
-        dialogue = dialogue + short_replica_1
-      short_replica_2 = re.findall('(?<=:) *[«|"].*?[»|"]', paragraph)
-      if len(short_replica_2) != 0:
-        dialogue = dialogue + short_replica_2
-      huge_replica_2 = re.findall('[«|"].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(--|––|–|-).*?[»|"]', paragraph)
-      if len(huge_replica_2) != 0:
-        for sentence in huge_replica_2:
-          replicas_and_authors_2 = re.findall('.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(?=(--|––|–|-))', sentence)
+        replicas_and_authors_1_2 = re.findall('[–|-][–|-].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..](?= *[–|-][–|-].*?[(!)+|(?)+|.|...|…|..|,|!?|?!|?!?|!?!|!..|?..])', paragraph)
+        if len(replicas_and_authors_1_2) != 0:
+          for index in range(len(replicas_and_authors_1_2)):
+            if index % 2 == 0:
+              dialogue.append(replicas_and_authors_1_2[index])
+          if len(replicas_and_authors_1_2) % 2 == 0:
+            last_extracted = replicas_and_authors_1_2[len(replicas_and_authors_1_2)-1]
+            last_extracted = last_extracted.replace('.','\.').replace('?','\?').replace('*','\*').replace('+','\+').replace('(','\(').replace(')','\)').replace('[','\[').replace(']','\]')
+            last_replica = re.findall('(?<={last_extracted}).*'.format(last_extracted = last_extracted), paragraph)
+            dialogue = dialogue + last_replica
+
+        else:
+          for replica in huge_replica_1:
+            dialogue.append(replica.replace('\n', ''))
+        
+  # replicas with «»
+  else:
+    short_replica_1 = re.findall('[«|\"].*?[»|\"](?= *[–|-])', paragraph)
+    if len(short_replica_1) != 0:
+      dialogue = dialogue + short_replica_1
+
+    short_replica_2 = re.findall('(?<=:) *[«|\"].*?[»|\"]', paragraph)
+    if len(short_replica_2) != 0:
+      dialogue = dialogue + short_replica_2
+      
+    huge_replica_2 = re.findall('[«|\"].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *[–|-].*?[»|\"]', paragraph)
+    if len(huge_replica_2) != 0:
+      for sentence in huge_replica_2:
+        replicas_and_authors_2 = re.findall('.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(?=[–|-][–|-])', sentence)
+        if len(replicas_and_authors_2) != 0:
           for index in range(len(replicas_and_authors_2)):
             if index % 2 == 0:
               dialogue.append(replicas_and_authors_2[index])
@@ -61,11 +91,40 @@ for text in texts:
             last_extracted_2 = last_extracted_2.replace('.','\.').replace('?','\?').replace('*','\*').replace('+','\+').replace('(','\(').replace(')','\)').replace('[','\[').replace(']','\]')
             last_replica_2 = re.findall('(?<={last_extracted_2}).*'.format(last_extracted_2 = last_extracted_2), sentence)
             dialogue = dialogue + last_replica_2
-      if len(short_replica_1) == 0 and len(short_replica_2) == 0 and len(huge_replica_2) == 0:
-        huge_replica_3 = re.findall('\\n *[«|"].*?[»|"] *\\n', paragraph)
-        if len(huge_replica_3) != 0:
-          for replica in huge_replica_3:
-            dialogue.append(replica.replace('\n', ''))
+    else:
+      huge_replica_2_1 = re.findall('[«|\"].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *–.*?[»|\"]', paragraph)
+      if len(huge_replica_2_1) != 0:
+        for sentence in huge_replica_2_1:
+          replicas_and_authors_2 = re.findall('.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(?=–)', sentence)
+          if len(huge_replica_2_1) != 0:
+            for index in range(len(huge_replica_2_1)):
+              if index % 2 == 0:
+                dialogue.append(replicas_and_authors_2[index])
+            if len(replicas_and_authors_2) % 2 == 0:
+              last_extracted_2 = replicas_and_authors_2[len(replicas_and_authors_2)-1]
+              last_extracted_2 = last_extracted_2.replace('.','\.').replace('?','\?').replace('*','\*').replace('+','\+').replace('(','\(').replace(')','\)').replace('[','\[').replace(']','\]')
+              last_replica_2 = re.findall('(?<={last_extracted_2}).*'.format(last_extracted_2 = last_extracted_2), sentence)
+              dialogue = dialogue + last_replica_2
+      else:
+        huge_replica_2_2 = re.findall('[«|\"].*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *-.*?[»|\"]', paragraph)
+        if len(huge_replica_2_2) != 0:
+          for sentence in huge_replica_2_2:
+            replicas_and_authors_2 = re.findall('.*?[(!)+|(?)+|.|,|...|…|..|!?|?!|?!?|!?!|!..|?..] *(?=-)', sentence)
+            if len(huge_replica_2_2) != 0:
+              for index in range(len(huge_replica_2_2)):
+                if index % 2 == 0:
+                  dialogue.append(replicas_and_authors_2[index])
+              if len(replicas_and_authors_2) % 2 == 0:
+                last_extracted_2 = replicas_and_authors_2[len(replicas_and_authors_2)-1]
+                last_extracted_2 = last_extracted_2.replace('.','\.').replace('?','\?').replace('*','\*').replace('+','\+').replace('(','\(').replace(')','\)').replace('[','\[').replace(']','\]')
+                last_replica_2 = re.findall('(?<={last_extracted_2}).*'.format(last_extracted_2 = last_extracted_2), sentence)
+                dialogue = dialogue + last_replica_2
+      
+    if len(short_replica_1) == 0 and len(short_replica_2) == 0 and len(huge_replica_2) == 0 and len(huge_replica_2_1) == 0 and len(huge_replica_2_2):
+      huge_replica_3 = re.findall('\n *[«|\"].*?[»|\"] *\n', paragraph)
+      if len(huge_replica_3) != 0:
+        for replica in huge_replica_3:
+          dialogue.append(replica.replace('\n', ''))
 
   # extract author's name
   index_author = text.index('.')
@@ -100,7 +159,7 @@ for text in texts:
   dialogues_wordcout.append(dialogue_words)
 
 # preparing dataset 
-df_columns = ['author', 'book', 'book_wordcount', 'dialogues', 'dialogues_wordcout', 'ratio']
+df_columns = ['author', 'book', 'dialogues', 'dialogues_wordcout', 'book_wordcount', 'ratio']
 dataframe = pd.DataFrame(columns = df_columns)
 dataframe['author'] = authors
 dataframe['book'] = books
