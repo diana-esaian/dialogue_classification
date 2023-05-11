@@ -92,7 +92,7 @@ def main():
         for topic in lda.print_topics():
             topic_extracted = re.findall(r'(?<=")\w.*?(?=")', topic[1])
             for i in topic_extracted:
-                if i not in topic_extracted:
+                if i not in topics_book:
                     topics_book.append(i)
 
         # extract author's name
@@ -106,7 +106,7 @@ def main():
         books.append(title)
 
         # topics 
-        topics.append(topic_extracted)
+        topics.append(topics_book)
 
     df_columns = ['author', 'book', 'topics']
     dataframe = pd.DataFrame(columns = df_columns)
