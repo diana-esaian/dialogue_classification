@@ -17,8 +17,6 @@ text_folder = 'texts'
 texts = os.listdir(text_folder)
 
 # lists for future dataset
-all_authors = []
-all_books = []
 all_topics = []
 
 def preprocess(input_text, punctuation, stop_words):
@@ -33,7 +31,7 @@ def preprocess(input_text, punctuation, stop_words):
   for span in doc_natasha.spans:
     if span.type == 'PER':
       span.normalize(morph_vocab)
-      if span.normal not in names:
+      if span.normal.lower() not in names:
         names.append(span.normal.lower())
   black_list = stop_words + list(punctuation)
   for name in names:
@@ -42,9 +40,10 @@ def preprocess(input_text, punctuation, stop_words):
   for token in doc_natasha.tokens:
     if token.pos in allowed_pos:
       token.lemmatize(morph_vocab)
-      if token.lemma not in black_list:
+      if token.lemma.lower() not in black_list:
         if re.findall('\D+', token.lemma) != 0:
-          lemmatized_text.append(token.lemma)
+          if token.lemma.lower() != 'то':
+            lemmatized_text.append(token.lemma.lower())
   return lemmatized_text
 
 with open ('stop_ru.txt', encoding="utf8") as stop_file:
@@ -72,28 +71,14 @@ for text in texts:
         # print("Topic "+str(index)+": ",top_terms_list)
         topics.append(top_terms_list)
    
-    # index_author = text.index('.')
-    # author = text[:index_author]
-    # print(author)
-    # all_authors.append(author)
-
-    # extract book title 
-    # index_title = text.rindex('.')
-    # title = text[index_author+1:index_title]
-    # all_books.append(title)
-    # print(index_title)
-
     # topics
     all_topics.append(topics)
-    print(topics)
 
     print(count)
     count +=1
 
-df_columns = ['author', 'book', 'topics']
+df_columns = ['topics']
 dataframe = pd.DataFrame(columns = df_columns)
-# dataframe['author'] = all_authors
-# dataframe['book'] = all_books
 dataframe['topics'] = all_topics
 
 # creating a dataset 
